@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAJ-EXPRESS — Интернет-магазин</title>
+    <style>
+        :root {
+            --wb-purple: #CB11AB;
+            --wb-purple-dark: #990c80;
+            --wb-purple-light: #f5e6f2;
+            --wb-dark: #111111;
+            --wb-gray: #f4f5f7;
+            --wb-border: #e0e0e0;
+            --success: #00a046;
+            --danger: #f5495c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--wb-gray);
+            color: var(--wb-dark);
+            padding-bottom: 70px;
+        }
+
+        header {
+            background-color: var(--wb-purple);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            color: white;
+            text-decoration: none;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box button {
+            background: var(--wb-purple-dark);
+            color: white;
+            border: none;
+            padding: 0 16px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-action {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-action:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .categories-bar {
+            background: white;
+            border-bottom: 1px solid var(--wb-border);
+            padding: 8px 16px;
+            overflow-x: auto;
+            white-space: nowrap;
+            display: flex;
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .cat-chip {
+            background: var(--wb-gray);
+            border: 1px solid var(--wb-border);
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .cat-chip.active, .cat-chip:hover {
+            background: var(--wb-purple-light);
+            color: var(--wb-purple);
+            border-color: var(--wb-purple);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 16px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        @media(min-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .product-img-wrap {
+            width: 100%;
+            height: 200px;
+            background: #eee;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: var(--wb-purple);
+            color: white;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 4px;
+        }
+
+        .product-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .product-price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .product-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--wb-dark);
+        }
+
+        .product-old-price {
+            font-size: 12px;
+            color: #888;
+            text-decoration: line-through;
+        }
+
+        .product-title {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .btn-buy {
+            background: var(--wb-purple);
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .btn-buy:hover {
+            background: var(--wb-purple-dark);
+        }
+
+        /* Modal windows */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 16px;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 12px;
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--wb-border);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--wb-purple);
+        }
+
+        .btn-primary {
+            background: var(--wb-purple);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-primary:hover {
+            background: var(--wb-purple-dark);
+        }
+
+        /* Admin & Seller Dashboard */
+        .admin-section {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--wb-purple-light);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--wb-purple);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #555;
+            margin-top: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--wb-border);
+            text-align: left;
+        }
+
+        th {
+            background: var(--wb-gray);
+            font-weight: 600;
+        }
+
+        .badge-status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        /* Mobile bottom nav */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            border-top: 1px solid var(--wb-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--wb-purple);
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            margin-bottom: 2px;
+            fill: currentColor;
+        }
+
+        @media(min-width: 768px) {
+            .mobile-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a class="logo" onclick="switchView('store')">TAJ-EXPRESS</a>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Поиск товаров (одежда, телефоны, парфюмерия...)" oninput="filterProducts()">
+                <button onclick="filterProducts()">Найти</button>
+            </div>
+            <div class="header-actions">
+                <button class="btn-action" onclick="openModal('sellerRegModal')">💼 Стать продавцом</button>
+                <button class="btn-action" onclick="openAdminLogin()">⚙️ Админ</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Categories -->
+    <div class="categories-bar" id="categoriesBar">
+        <div class="cat-chip active" onclick="filterCategory('Все')">Все категории</div>
+        <div class="cat-chip" onclick="filterCategory('Одежда')">Одежда</div>
+        <div class="cat-chip" onclick="filterCategory('Телефоны')">Телефоны</div>
+        <div class="cat-chip" onclick="filterCategory('Обувь')">Обувь</div>
+        <div class="cat-chip" onclick="filterCategory('Аксессуары')">Аксессуары</div>
+        <div class="cat-chip" onclick="filterCategory('Продукты')">Озиқ овқат</div>
+        <div class="cat-chip" onclick="filterCategory('Парфюмерия')">Парфюмерия</div>
+        <div class="cat-chip" onclick="filterCategory('Подарки')">Подарки</div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-container" id="mainContent">
+        <h2 class="section-title" id="catalogTitle">Популярные товары</h2>
+        <div class="products-grid" id="productsGrid">
+            <!-- Dynamic products -->
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-nav">
+        <div class="nav-item active" onclick="switchView('store')">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Главная
+        </div>
+        <div class="nav-item" onclick="openModal('sellerRegModal')">
+            <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 15H4V8h16v11z"/></svg>
+            Продавать
+        </div>
+        <div class="nav-item" onclick="openAdminLogin()">
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            Админ
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Checkout Modal -->
+    <div class="modal-backdrop" id="checkoutModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('checkoutModal')">&times;</button>
+            <h3 class="section-title">Оформление заказа</h3>
+            <p id="checkoutProductInfo" style="margin-bottom: 12px; font-weight: 600; color: var(--wb-purple);"></p>
+            <form onsubmit="submitOrder(event)">
+                <div class="form-group">
+                    <label>Ваше имя</label>
+                    <input type="text" id="orderName" required placeholder="Например: Ислам">
+                </div>
+                <div class="form-group">
+                    <label>Фамилия</label>
+                    <input type="text" id="orderSurname" required placeholder="Например: Каримов">
+                </div>
+                <div class="form-group">
+                    <label>Номер телефона</label>
+                    <input type="tel" id="orderPhone" required placeholder="+992 XXX XX XX XX">
+                </div>
+                <div class="form-group">
+                    <label>Адрес доставки</label>
+                    <input type="text" id="orderAddress" required placeholder="Город, улица, дом, квартира">
+                </div>
+                <button type="submit" class="btn-primary">Заказать (WhatsApp + Админ)</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Seller Registration Modal -->
+    <div class="modal-backdrop" id="sellerRegModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('sellerRegModal')">&times;</button>
+            <h3 class="section-title">Стать продавцом</h3>
+            <form onsubmit="submitSellerApp(event)">
+                <div class="form-group">
+                    <label>ФИО полностью</label>
+                    <input type="text" id="sellerFullName" required placeholder="ФИО продавца">
+                </div>
+                <div class="form-group">
+                    <label>Номер телефона</label>
+                    <input type="tel" id="sellerPhone" required placeholder="+992 XXX XX XX XX">
+                </div>
+                <button type="submit" class="btn-primary">Отправить заявку</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal-backdrop" id="adminLoginModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('adminLoginModal')">&times;</button>
+            <h3 class="section-title">Вход в Админ панель</h3>
+            <form onsubmit="verifyAdmin(event)">
+                <div class="form-group">
+                    <label>Пароль (Админ / Модератор)</label>
+                    <input type="password" id="adminPasswordInput" required placeholder="Введите пароль">
+                </div>
+                <button type="submit" class="btn-primary">Войти</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard View (JS Rendered) -->
+
+    <script>
+        // Data Store & Initialization
+        let products = JSON.parse(localStorage.getItem('taj_products')) || [
+            { id: 1, title: 'Смартфон Redmi Note 13 Pro 8/256GB', price: 2450, oldPrice: 2990, discount: '-18%', category: 'Телефоны', image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500' },
+            { id: 2, title: 'Кроссовки спортивные Nike Air', price: 450, oldPrice: 650, discount: '-30%', category: 'Обувь', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500' },
+            { id: 3, title: 'Куртка зимняя оверсайз утепленная', price: 780, oldPrice: 1100, discount: '-29%', category: 'Одежда', image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500' },
+            { id: 4, title: 'Набор парфюмерии Hugo Boss 100ml', price: 320, oldPrice: 500, discount: '-36%', category: 'Парфюмерия', image: 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=500' }
+        ];
+
+        let orders = JSON.parse(localStorage.getItem('taj_orders')) || [];
+        let sellers = JSON.parse(localStorage.getItem('taj_sellers')) || [];
+        let assistantAdmins = JSON.parse(localStorage.getItem('taj_assistants')) || [];
+        let activeCategory = 'Все';
+        let currentBuyingProduct = null;
+        let currentUserRole = null; // 'admin', 'assistant', 'moderator'
+
+        // Visitor Counter simulation (persisted)
+        let visits = parseInt(localStorage.getItem('taj_visits') || '142') + 1;
+        localStorage.setItem('taj_visits', visits);
+
+        // 1-Year Order Retention Check (Clean orders older than 365 days)
+        const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+        orders = orders.filter(o => (Date.now() - o.timestamp) < ONE_YEAR_MS);
+        localStorage.setItem('taj_orders', JSON.stringify(orders));
+
+        function saveState() {
+            localStorage.setItem('taj_products', JSON.stringify(products));
+            localStorage.setItem('taj_orders', JSON.stringify(orders));
+            localStorage.setItem('taj_sellers', JSON.stringify(sellers));
+            localStorage.setItem('taj_assistants', JSON.stringify(assistantAdmins));
+        }
+
+        // Render Store Catalog
+        function renderStore(filterText = '') {
+            const grid = document.getElementById('productsGrid');
+            const titleEl = document.getElementById('catalogTitle');
+            titleEl.textContent = activeCategory === 'Все' ? 'Популярные товары' : `Категория: ${activeCategory}`;
+
+            let filtered = products.filter(p => {
+                let matchCat = activeCategory === 'Все' || p.category === activeCategory;
+                let matchText = p.title.toLowerCase().includes(filterText.toLowerCase()) || p.category.toLowerCase().includes(filterText.toLowerCase());
+                return matchCat && matchText;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding: 40px; color: #666;">Товары не найдены</p>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="product-card">
+                    <div class="product-img-wrap">
+                        ${p.discount ? `<div class="discount-badge">${p.discount}</div>` : ''}
+                        <img src="${p.image}" alt="${p.title}" loading="lazy">
+                    </div>
+                    <div class="product-info">
+                        <div class="product-price-row">
+                            <span class="product-price">${p.price} сомони</span>
+                            ${p.oldPrice ? `<span class="product-old-price">${p.oldPrice} сомони</span>` : ''}
+                        </div>
+                        <div class="product-title">${p.title}</div>
+                        <button class="btn-buy" onclick="openCheckout(${p.id})">Купить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCategory(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-chip').forEach(el => {
+                el.classList.toggle('active', el.textContent.includes(cat) || (cat === 'Все' && el.textContent.includes('Все')));
+            });
+            renderStore(document.getElementById('searchInput').value);
+        }
+
+        function filterProducts() {
+            const query = document.getElementById('searchInput').value;
+            renderStore(query);
+        }
+
+        // Modals management
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function switchView(view) {
+            if (view === 'store') {
+                document.getElementById('mainContent').innerHTML = `
+                    <h2 class="section-title" id="catalogTitle">Популярные товары</h2>
+                    <div class="products-grid" id="productsGrid"></div>
+                `;
+                renderStore();
+            }
+        }
+
+        // Checkout & WhatsApp Integration
+        function openCheckout(productId) {
+            currentBuyingProduct = products.find(p => p.id === productId);
+            if (!currentBuyingProduct) return;
+            document.getElementById('checkoutProductInfo').textContent = `${currentBuyingProduct.title} — ${currentBuyingProduct.price} сомони`;
+            openModal('checkoutModal');
+        }
+
+        function submitOrder(e) {
+            e.preventDefault();
+            const name = document.getElementById('orderName').value;
+            const surname = document.getElementById('orderSurname').value;
+            const phone = document.getElementById('orderPhone').value;
+            const address = document.getElementById('orderAddress').value;
+
+            const newOrder = {
+                id: Date.now(),
+                product: currentBuyingProduct.title,
+                price: currentBuyingProduct.price,
+                customer: `${surname} ${name}`,
+                phone: phone,
+                address: address,
+                timestamp: Date.now(),
+                dateStr: new Date().toLocaleString()
+            };
+
+            orders.unshift(newOrder);
+            saveState();
+
+            // WhatsApp link construction (+992051923434)
+            const waNumber = "992051923434";
+            const waText = encodeURIComponent(`🛍 Новый заказ TAJ-EXPRESS!\n\nТовар: ${currentBuyingProduct.title}\nЦена: ${currentBuyingProduct.price} сомони\nИмя Фамилия: ${surname} ${name}\nТелефон: ${phone}\nАдрес: ${address}`);
+            
+            closeModal('checkoutModal');
+            alert('Заказ успешно оформлен! Перенаправляем в WhatsApp...');
+            window.open(`https://wa.me/${waNumber}?text=${waText}`, '_blank');
+        }
+
+        // Seller Application
+        function submitSellerApp(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('sellerFullName').value;
+            const phone = document.getElementById('sellerPhone').value;
+
+            sellers.push({
+                id: Date.now(),
+                fullName,
+                phone,
+                status: 'pending',
+                taxRate: 0
+            });
+            saveState();
+            closeModal('sellerRegModal');
+            alert('Ваша заявка успешно отправлена администратору!');
+        }
+
+        // Admin Auth & Dashboard
+        function openAdminLogin() {
+            openModal('adminLoginModal');
+        }
+
+        function verifyAdmin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPasswordInput').value;
+            closeModal('adminLoginModal');
+
+            if (pass === '2007') {
+                currentUserRole = 'admin';
+                renderAdminDashboard();
+            } else if (pass === 'moderator' || pass === 'mod123') {
+                currentUserRole = 'moderator';
+                renderAdminDashboard();
+            } else if (assistantAdmins.some(a => a.pass === pass)) {
+                currentUserRole = 'assistant';
+                renderAdminDashboard();
+            } else {
+                alert('Неверный пароль!');
+            }
+        }
+
+        function renderAdminDashboard() {
+            const main = document.getElementById('mainContent');
+            
+            let assistantManageHtml = '';
+            if (currentUserRole === 'admin') {
+                assistantManageHtml = `
+                    <div class="admin-section">
+                        <h3>Добавить помощника (Правая/Левая рука)</h3>
+                        <form onsubmit="addAssistant(event)" style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                            <input type="text" id="astName" placeholder="Имя помощника" required style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                            <input type="text" id="astPass" placeholder="Пароль для входа" required style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                            <button type="submit" class="btn-sm btn-success">Добавить</button>
+                        </form>
+                        <div style="margin-top:10px;">
+                            ${assistantAdmins.map((a, i) => `<div>${a.name} (Пароль: ${a.pass}) <button class="btn-sm btn-danger" onclick="removeAssistant(${i})">Удалить</button></div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            main.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h2 class="section-title">Панель управления (${currentUserRole.toUpperCase()})</h2>
+                    <button class="btn-action" style="background:var(--danger);" onclick="switchView('store')">Выйти из админки</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-num">${visits}</div>
+                        <div class="stat-label">Всего посещений</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num">${orders.length}</div>
+                        <div class="stat-label">Заказов (хранятся 1 год)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num">${sellers.filter(s=>s.status==='approved').length}</div>
+                        <div class="stat-label">Активных продавцов</div>
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h3>Добавить товар с изображением</h3>
+                    <form onsubmit="addNewProduct(event)" style="margin-top:10px;">
+                        <div class="form-group"><label>Название товара</label><input type="text" id="newTitle" required></div>
+                        <div class="form-group"><label>Категория</label>
+                            <select id="newCategory">
+                                <option>Одежда</option><option>Телефоны</option><option>Обувь</option><option>Аксессуары</option><option>Продукты</option><option>Парфюмерия</option><option>Подарки</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Цена (сомони)</label><input type="number" id="newPrice" required></div>
+                        <div class="form-group"><label>Старая цена (сомони)</label><input type="number" id="newOldPrice"></div>
+                        <div class="form-group"><label>Скидка (например -20%)</label><input type="text" id="newDiscount" placeholder="-20%"></div>
+                        <div class="form-group"><label>Фотография (выберите файл с телефона/ПК)</label><input type="file" id="newImageFile" accept="image/*" required></div>
+                        <button type="submit" class="btn-primary">Опубликовать товар</button>
+                    </form>
+                </div>
+
+                <div class="admin-section">
+                    <h3>Заявки продавцов</h3>
+                    <table>
+                        <thead><tr><th>ФИО</th><th>Телефон</th><th>Налог %</th><th>Статус</th><th>Действия</th></tr></thead>
+                        <tbody>
+                            ${sellers.length === 0 ? '<tr><td colspan="5" style="text-align:center;">Нет заявок</td></tr>' : 
+                                sellers.map((s, idx) => `
+                                    <tr>
+                                        <td>${s.fullName}</td>
+                                        <td>${s.phone}</td>
+                                        <td><input type="number" value="${s.taxRate}" style="width:60px;" onchange="updateTax(${idx}, this.value)">%</td>
+                                        <td><span class="badge-status ${s.status==='approved'?'status-approved':'status-pending'}">${s.status}</span></td>
+                                        <td>
+                                            ${s.status === 'pending' ? `<button class="btn-sm btn-success" onclick="approveSeller(${idx})">Одобрить</button>` : ''}
+                                            <button class="btn-sm btn-danger" onclick="deleteSeller(${idx})">Удалить</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="admin-section">
+                    <h3>Заказы клиентов (хранение 1 год)</h3>
+                    <table>
+                        <thead><tr><th>Дата</th><th>Товар</th><th>Цена</th><th>Покупатель</th><th>Телефон</th><th>Адрес</th></tr></thead>
+                        <tbody>
+                            ${orders.length === 0 ? '<tr><td colspan="6" style="text-align:center;">Нет заказов</td></tr>' :
+                                orders.map(o => `
+                                    <tr>
+                                        <td>${o.dateStr}</td>
+                                        <td>${o.product}</td>
+                                        <td>${o.price} сомони</td>
+                                        <td>${o.customer}</td>
+                                        <td>${o.phone}</td>
+                                        <td>${o.address}</td>
+                                    </tr>
+                                `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                ${assistantManageHtml}
+            `;
+        }
+
+        // Admin actions
+        function addNewProduct(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('newImageFile');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const newProd = {
+                    id: Date.now(),
+                    title: document.getElementById('newTitle').value,
+                    category: document.getElementById('newCategory').value,
+                    price: Number(document.getElementById('newPrice').value),
+                    oldPrice: Number(document.getElementById('newOldPrice').value) || 0,
+                    discount: document.getElementById('newDiscount').value,
+                    image: event.target.result // Base64 image
+                };
+                products.unshift(newProd);
+                saveState();
+                alert('Товар успешно добавлен!');
+                renderAdminDashboard();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function approveSeller(idx) {
+            sellers[idx].status = 'approved';
+            saveState();
+            renderAdminDashboard();
+        }
+
+        function deleteSeller(idx) {
+            sellers.splice(idx, 1);
+            saveState();
+            renderAdminDashboard();
+        }
+
+        function updateTax(idx, val) {
+            sellers[idx].taxRate = Number(val);
+            saveState();
+        }
+
+        function addAssistant(e) {
+            e.preventDefault();
+            const name = document.getElementById('astName').value;
+            const pass = document.getElementById('astPass').value;
+            assistantAdmins.push({ name, pass });
+            saveState();
+            renderAdminDashboard();
+        }
+
+        function removeAssistant(idx) {
+            assistantAdmins.splice(idx, 1);
+            saveState();
+            renderAdminDashboard();
+        }
+
+        // Initial render
+        renderStore();
+    </script>
+</body>
+</html>
